@@ -1,0 +1,32 @@
+{{$global := 0}}
+{{$name := "Shield"}}
+{{$length := 600}}
+{{$announce := 1}}
+
+{{if eq $global 0}}{{$global = .User.ID}}
+{{else}}
+{{$global = (toInt64 0)}}
+{{end}}
+{{if (dbGet $global $name)}}
+{{if eq $announce 1}}
+⚠️ <@{{.User.ID}}> Your shield Potion is still on cooldown for: {{humanizeDurationSeconds ((dbGet $global $name).ExpiresAt.Sub currentTime)}} ⚠️
+{{deleteResponse 5}}
+{{deleteTrigger 0}}
+{{end}}
+{{else}}
+
+{{ if targetHasRoleID .User.ID 601099725437009934 }}
+⚠️ <@{{.User.ID}}> Your shield Potion is full ⚠️
+{{deleteResponse 5}}
+{{deleteTrigger 0}}
+{{else}}
+{{giveRoleName .User "𝚂𝙷𝙸𝙴𝙻𝙳 𝟷𝟶%⠀"}}
+{{giveRoleName .User "𝚂𝙷𝙸𝙴𝙻𝙳 𝟸𝟶%⠀"}}
+{{ $embed := cembed "title" (joinStr ""  .User.Username " took a Shield Potion" "!") 
+"color" 1288191
+"footer" (sdict "text" "successfully at:" "icon_url" "https://cdn.discordapp.com/emojis/526001063619330048.gif") 
+"timestamp" currentTime  }}
+{{ sendMessage nil $embed}}
+{{dbSetExpire $global $name "cooldown" $length}}
+{{end}}
+{{end}}
